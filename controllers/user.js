@@ -4,6 +4,7 @@ import { sendEmail } from '../middlewares/sendEmail.js';
 import crypto from 'crypto';
 import cloudinary from 'cloudinary';
 import getDataUri from '../utils/dataUri.js';
+import { sendToken } from '../utils/sendToken.js';
 
 export const register = async (req, res) => {
   try {
@@ -25,18 +26,10 @@ export const register = async (req, res) => {
       password,
       avatar: { public_id: myCloud.public_id, url: myCloud.secure_url },
     });
-    const token = await user.generateToken();
 
-    const options = {
-      expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-      httpOnly: true,
-    };
+  
 
-    res.status(201).cookie('token', token, options).json({
-      success: true,
-      user,
-      token,
-    });
+ sendToken(res,user,"Registered Sucessfully",201);
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -69,18 +62,9 @@ export const login = async (req, res) => {
       });
     }
 
-    const token = await user.generateToken();
+    sendToken(res, user, `Welcome back, ${user.name}`, 200);
 
-    const options = {
-      expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-      httpOnly: true,
-    };
 
-    res.status(200).cookie('token', token, options).json({
-      success: true,
-      user,
-      token,
-    });
   } catch (error) {
     res.status(500).json({
       success: false,
