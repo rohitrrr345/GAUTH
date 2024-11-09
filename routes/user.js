@@ -13,7 +13,8 @@ import {
   forgotPassword,
   resetPassword,
   getMyPosts,
-  getUserPosts
+  getUserPosts,
+  googleLogin
 } from '../controllers/user.js';
 import { isAuthenticated } from '../middlewares/auth.js';
 import singleUpload from '../middlewares/multer.js';
@@ -21,7 +22,7 @@ import singleUpload from '../middlewares/multer.js';
 const router = express.Router();
 
 router.route('/register').post(singleUpload,register);
-
+router.route('/googlelogin').post(googleLogin);
 router.route('/login').post(login);
 
 router.route('/logout').get(logout);

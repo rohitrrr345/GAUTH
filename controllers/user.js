@@ -5,7 +5,8 @@ import crypto from 'crypto';
 import cloudinary from 'cloudinary';
 import getDataUri from '../utils/dataUri.js';
 import { sendToken } from '../utils/sendToken.js';
-
+import { OAuth2Client } from 'google-auth-library';
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, 'http://localhost:5000/auth/google/callback');
 export const register = async (req, res) => {
   try {
     const { name, email, password} = req.body;
@@ -37,7 +38,41 @@ export const register = async (req, res) => {
     });
   }
 };
+export const googleLogin = async (req, res) => {
+  const { tokenId } = req.body;
 
+  try {
+    // Verify the Google ID token
+    const ticket = await client.verifyIdToken({
+      idToken: tokenId,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const { email, name, picture, sub: googleId } = ticket.getPayload();
+
+    // Check if the user already exists in the database
+    let user = await User.findOne({ googleId });
+
+    if (!user) {
+      // If the user doesn't exist, create a new one
+      user = await User.create({
+        name,
+        email,
+        avatar: {
+          url: picture,
+        },
+        googleId,
+        authMethod: 'google',
+      });
+    }
+    sendToken(res,user,"Registered Sucessfully",201);
+
+    // Generate a JWT token for the user
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Google login failed' });
+  }
+};
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;

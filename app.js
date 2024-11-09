@@ -26,10 +26,10 @@ app.use(
 // Importing Routes
 import postRoutes from './routes/post.js';
 import userRoutes from './routes/user.js';
-
 // Using Routes
 app.use('/api/v1', postRoutes);
 app.use('/api/v1', userRoutes);
+
 
 
 export default app;
